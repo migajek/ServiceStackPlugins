@@ -104,7 +104,7 @@ namespace ServiceStackPlugins.PerFieldAuth
             if (dto == null)
                 return;
             var sess = GetAuthSession(request);
-            var roles = (sess == null) ? Enumerable.Empty<string>() : sess.Roles;
+            var roles = (sess == null) ? Enumerable.Empty<string>() : sess.Roles;            
 
             ProcessDto(dto, roles, sess != null && sess.IsAuthenticated);
         }
