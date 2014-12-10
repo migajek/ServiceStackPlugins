@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStackPlugins.Interfaces;
+using ServiceStackPlugins.Interfaces.Auth;
 using ServiceStackPlugins.PerFieldAuth;
 
 namespace ServiceStackPlugins.Tests

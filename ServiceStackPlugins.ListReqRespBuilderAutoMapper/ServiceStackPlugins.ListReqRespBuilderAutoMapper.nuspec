@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>    
+    <projectUrl>https://github.com/migajek/ServiceStackPlugins</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description><![CDATA[ Extends ListRequestResponse builder plugin with AutoMapper's Project().To<>() support ]]></description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2014 Michał migajek Gajek</copyright>
+    <tags>ServiceStack plugins listrequest listresponse crud automapper</tags>
+    <dependencies>                  
+      <dependency id="ServiceStackPlugins.ListReqRespBuilder" version="[1.0,)" />
+      <dependency id="AutoMapper" version="[3.3,)" />
+    </dependencies>
+  </metadata>
+</package>

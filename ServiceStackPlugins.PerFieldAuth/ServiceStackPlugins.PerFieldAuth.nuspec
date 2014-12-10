@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>    
+    <projectUrl>https://github.com/migajek/ServiceStackPlugins</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description><![CDATA[ PerFieldAuth for ServiceStack allows for defining authentication roles required for the specific DTO fields to be accessible ]]></description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2014 Michał migajek Gajek</copyright>
+    <tags>ServiceStack authentication plugin perfield rowlevel row level</tags>
+	  <dependencies>
+		  <dependency id="ServiceStack" version="(4.0,)" />
+		  <dependency id="ServiceStackPlugins.Interfaces" version="" />
+	  </dependencies>
+  </metadata>
+</package>

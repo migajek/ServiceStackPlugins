@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ServiceStackPlugins.Interfaces
+namespace ServiceStackPlugins.Interfaces.Auth
 {
     public abstract class BaseAuthAttribute : Attribute
     {

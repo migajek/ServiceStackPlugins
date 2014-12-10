@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>    
+    <projectUrl>https://github.com/migajek/ServiceStackPlugins</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description><![CDATA[ ServiceStack plugins interfaces ]]></description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2014 Michał migajek Gajek</copyright>
+    <tags>ServiceStack plugins</tags>
+    <dependencies>      
+      <dependency id="ServiceStack.Interfaces" version="(4.0,)" />
+    </dependencies>
+  </metadata>
+</package>

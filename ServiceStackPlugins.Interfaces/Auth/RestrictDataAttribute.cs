@@ -1,4 +1,4 @@
-﻿namespace ServiceStackPlugins.Interfaces
+﻿namespace ServiceStackPlugins.Interfaces.Auth
 {
     /// <summary>
     /// Specifies set of roles required to access the field / DTO.

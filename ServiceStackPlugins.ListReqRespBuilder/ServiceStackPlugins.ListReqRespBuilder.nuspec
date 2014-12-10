@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>    
+    <projectUrl>https://github.com/migajek/ServiceStackPlugins</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description><![CDATA[ ServiceStack plugin for auto-handling list requests over LINQ queryset, including pagination, sorting and converting to response DTO type using ServiceStack's ConvertTo method]]></description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2014 Michał migajek Gajek</copyright>
+    <tags>ServiceStack plugins listrequest listresponse crud</tags>
+    <dependencies>      
+      <dependency id="ServiceStack.Text" version="(4.0,)" />
+      <dependency id="ServiceStackPlugins.Interfaces" version="[1.1,)" />
+    </dependencies>
+  </metadata>
+</package>

@@ -10,6 +10,7 @@ using ServiceStack.Auth;
 using ServiceStack.Caching;
 using ServiceStack.Web;
 using ServiceStackPlugins.Interfaces;
+using ServiceStackPlugins.Interfaces.Auth;
 
 namespace ServiceStackPlugins.PerFieldAuth
 {
