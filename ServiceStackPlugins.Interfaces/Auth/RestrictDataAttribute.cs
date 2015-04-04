@@ -9,10 +9,16 @@
     {
         public bool RespectGlobalIgnores { get; set; }
 
-        public RestrictDataAttribute(params string[] restrictToRoles)
-            : base(restrictToRoles)
+        public RestrictDataAttribute(RolesPermsJoinMode rolesPermsJoin, params string[] restrictToRoles)
+            : base(rolesPermsJoin)
         {
+            Roles = restrictToRoles;
             RespectGlobalIgnores = true;
+        }
+
+        public RestrictDataAttribute(params string[] restrictToRoles)
+            : this(RolesPermsJoinMode.Or, restrictToRoles)
+        {
         }
     }
 }

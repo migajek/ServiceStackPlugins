@@ -4,11 +4,24 @@ namespace ServiceStackPlugins.Interfaces.Auth
 {
     public abstract class BaseAuthAttribute : Attribute
     {
-        public string[] Roles { get; private set; }
-
-        protected BaseAuthAttribute(params string[] roles)
+        /// <summary>
+        /// Specifies what kind of lookup to perform.         
+        /// </summary>
+        public enum RolesPermsJoinMode
         {
-            Roles = roles;
+            And,
+            Or
+        };
+
+        public string[] Roles { get; protected set; }
+        public string[] Permissions { get; set; }
+        public RolesPermsJoinMode RolesPermsJoin { get; set; }       
+
+        protected BaseAuthAttribute(RolesPermsJoinMode rolesPermsJoin)
+        {            
+            this.RolesPermsJoin = rolesPermsJoin;
+            Roles = new string[0];
+            Permissions = new string[0];
         }
     }
 }

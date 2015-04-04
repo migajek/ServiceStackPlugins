@@ -13,16 +13,17 @@ namespace ServiceStackPlugins.Tests
     internal interface IDTOBase
     {
         string GUID { get; set; }
-        string Name { get; set; }        
-        string SecretForAdmin { get; set; }        
+        string Name { get; set; }
+        string SecretForAdmin { get; set; }
         string EmailForLoggedIn { get; set; }
     }
+
     internal class PublicIdtoWithSecretField : IDTOBase
     {
         public string GUID { get; set; }
         public string Name { get; set; }
 
-        [RestrictData("admin")]
+        [RestrictData("admin", Permissions = new []{"see-admin-secret"})]
         public string SecretForAdmin { get; set; }
 
         [RestrictData("@")]
@@ -35,13 +36,13 @@ namespace ServiceStackPlugins.Tests
         public string GUID { get; set; }
 
         [PermitField("*")]
-        public  string Name { get; set; }
+        public string Name { get; set; }
 
-        [PermitField("admin")]
+        [PermitField("admin", Permissions = new []{"see-admin-secret"})]
         public string SecretForAdmin { get; set; }
 
         [PermitField("@")]
-        public  string EmailForLoggedIn { get; set; }
+        public string EmailForLoggedIn { get; set; }
     }
 
 
@@ -49,6 +50,7 @@ namespace ServiceStackPlugins.Tests
     {
         public IEnumerable<IDTOBase> Dtos { get; set; }
     }
+
     [TestFixture]
     public class PerFieldAuthTests
     {
@@ -76,18 +78,18 @@ namespace ServiceStackPlugins.Tests
 
         [Test]
         public void BaseDTOTest()
-        {                        
+        {
             var plugin = new PerFieldAuthFeature();
-            plugin.GlobalIgnoredPropertyNames.Add("GUID");            
+            plugin.GlobalIgnoredPropertyNames.Add("GUID");
 
             var asAdmin = GetDTOs();
-            plugin.ProcessDto(asAdmin, new [] {"admin"}, true);            
+            plugin.ProcessDto(asAdmin, new[] {"admin"}, new string[0], true);
 
             var asLoggedIn = GetDTOs();
-            plugin.ProcessDto(asLoggedIn, Enumerable.Empty<string>(), true);
+            plugin.ProcessDto(asLoggedIn, Enumerable.Empty<string>(), new string[0], true);
 
             var asAnyone = GetDTOs();
-            plugin.ProcessDto(asAnyone, Enumerable.Empty<string>(), false);
+            plugin.ProcessDto(asAnyone, Enumerable.Empty<string>(), new string[0], false);
 
             var all = asAdmin.Union(asLoggedIn.Union(asAnyone)).ToList();
 
@@ -102,8 +104,21 @@ namespace ServiceStackPlugins.Tests
             Assert.That(asLoggedIn.Union(asAdmin).All(x => x.EmailForLoggedIn != null));
 
             // secret for admin visible only for admin
-            Assert.That(asAdmin.All( x => x.SecretForAdmin != null));
-            Assert.That(asLoggedIn.Union(asAnyone).All(x => x.SecretForAdmin == null));            
+            Assert.That(asAdmin.All(x => x.SecretForAdmin != null));
+            Assert.That(asLoggedIn.Union(asAnyone).All(x => x.SecretForAdmin == null));
+        }
+        [Test]
+        public void PermsAndRoles()
+        {
+            var plugin = new PerFieldAuthFeature();
+            plugin.GlobalIgnoredPropertyNames.Add("GUID");
+
+            var asAdmin = GetDTOs();
+            plugin.ProcessDto(asAdmin, null, new []{"see-admin-secret"}, true);
+
+            // secret for admin visible only for admin
+            Assert.That(asAdmin.All(x => x.SecretForAdmin != null));
+            //Assert.That(asLoggedIn.Union(asAnyone).All(x => x.SecretForAdmin == null));
         }
 
         [Test]
@@ -113,14 +128,14 @@ namespace ServiceStackPlugins.Tests
             plugin.GlobalIgnoredPropertyNames.Add("GUID");
 
             var asAnyone = new ListResponse() {Dtos = GetDTOs()};
-            plugin.ProcessDto(asAnyone, null, false);    
+            plugin.ProcessDto(asAnyone, null, new string[0], false);
             // no extractor yet
-            Assert.That(asAnyone.Dtos.All(x => x.EmailForLoggedIn != null));            
+            Assert.That(asAnyone.Dtos.All(x => x.EmailForLoggedIn != null));
 
             plugin.RegisterCustomTypeExtractor<ListResponse>(lst => lst.Dtos);
 
-            plugin.ProcessDto(asAnyone, null, false);    
-            Assert.That(asAnyone.Dtos.All(x => x.EmailForLoggedIn == null));            
+            plugin.ProcessDto(asAnyone, null, null, false);
+            Assert.That(asAnyone.Dtos.All(x => x.EmailForLoggedIn == null));
         }
     }
 }

@@ -6,8 +6,13 @@
     public class PermitFieldAttribute : BaseAuthAttribute
     {
         public PermitFieldAttribute(params string[] allowRoles)
-            : base(allowRoles)
+            : this(RolesPermsJoinMode.Or, allowRoles)
+        {            
+        }
+        public PermitFieldAttribute(RolesPermsJoinMode rolesPermsJoin, params string[] allowRoles)
+            : base(rolesPermsJoin)
         {
+            Roles = allowRoles;
         }
     }
 }
