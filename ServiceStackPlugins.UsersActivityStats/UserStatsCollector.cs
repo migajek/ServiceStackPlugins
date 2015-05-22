@@ -23,11 +23,11 @@ namespace ServiceStackPlugins.UsersActivityStats
 
     internal class UserStatsCollector: IDisposable
     {
-        private static string _cacheKey = typeof (UserStatsCollector).Name + "_user_list";
-        private Dictionary<string, UserInfo> userInfos;
-        private ICacheClient _cacheClient;        
+        private static readonly string CacheKey = typeof (UserStatsCollector).Name + "_user_list";
+        private Dictionary<string, UserInfo> _userInfos = new Dictionary<string, UserInfo>();
+        private readonly ICacheClient _cacheClient = null;      
 
-        public UserStatsCollector(ICacheClient cacheClient): this()
+        public UserStatsCollector(ICacheClient cacheClient)
         {            
             this._cacheClient = cacheClient;
             LoadFromCache(_cacheClient);
@@ -35,12 +35,11 @@ namespace ServiceStackPlugins.UsersActivityStats
 
         public void LoadFromCache(ICacheClient cacheClient)
         {
-            userInfos = cacheClient.Get<Dictionary<string, UserInfo>>(_cacheKey);
+            _userInfos = cacheClient.Get<Dictionary<string, UserInfo>>(CacheKey);
         }
 
         public UserStatsCollector()
-        {
-            userInfos = new Dictionary<string, UserInfo>();
+        {            
         }
 
         public void Dispose()
@@ -51,12 +50,12 @@ namespace ServiceStackPlugins.UsersActivityStats
 
         public void SaveToCache(ICacheClient cacheClient)
         {
-            cacheClient.Set(_cacheKey, userInfos);
+            cacheClient.Set(CacheKey, _userInfos);
         }
 
         public void UserSeen(string uid, string uname, string ip)
         {
-            userInfos[uid] = new UserInfo()
+            _userInfos[uid] = new UserInfo()
             {
                 UserId = uid,
                 UserName = uname,
@@ -68,7 +67,7 @@ namespace ServiceStackPlugins.UsersActivityStats
         public IEnumerable<UserActivityInfo> GetUsers(TimeSpan inactivityTreshold)
         {
             var now = DateTime.UtcNow;
-            return from u in userInfos.Values.OrderByDescending(x => x.LastSeen)
+            return from u in _userInfos.Values.OrderByDescending(x => x.LastSeen)
                 let inactiveFor = now - u.LastSeen
                 select new UserActivityInfo()
                 {
@@ -84,7 +83,7 @@ namespace ServiceStackPlugins.UsersActivityStats
         public void Cleanup(TimeSpan inactivityTreshold)
         {
             var now = DateTime.UtcNow;
-            userInfos = userInfos.Where(kv => now - kv.Value.LastSeen > inactivityTreshold).ToDictionary(kv => kv.Key, kv => kv.Value);
+            _userInfos = _userInfos.Where(kv => now - kv.Value.LastSeen > inactivityTreshold).ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 
         public void Cleanup(int inactivityTresholdSeconds)
