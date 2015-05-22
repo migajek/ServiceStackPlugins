@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>    
+    <projectUrl>https://github.com/migajek/ServiceStackPlugins</projectUrl>    
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description><![CDATA[ UserActivityStats for ServiceStack provides info on active users, including their's inactivity time and last seen IP ]]></description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2015 Michał migajek Gajek</copyright>
+    <tags>ServiceStack active users plugin</tags>
+	  <dependencies>
+		  <dependency id="ServiceStack" version="(4.0,)" />		  
+	  </dependencies>
+  </metadata>
+</package>

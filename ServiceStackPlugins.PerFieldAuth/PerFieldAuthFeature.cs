@@ -88,9 +88,10 @@ namespace ServiceStackPlugins.PerFieldAuth
                 var roles = dtoAttributes.SelectMany(x => x.Roles);
                 var perms = dtoAttributes.SelectMany(x => x.Permissions);
                 var mode = dtoAttributes.Select(x => x.RolesPermsJoin).FirstOrDefault();
+                var inverted = dtoAttributes.Select(x => x.Inverse).FirstOrDefault();
                 // if the user doesnt satisfy the requirements, add all the attributes to deletion
                 // dont delete it yet as it might be whitelisted later.
-                if (!UserSatisfiesRequirements(roles, perms, userAuthenticated, userRoles, userPerms, mode))
+                if (!UserSatisfiesRequirements(roles, perms, userAuthenticated, userRoles, userPerms, mode) ^ inverted)
                     foreach (
                         var property in
                             properties.Where(
@@ -105,18 +106,20 @@ namespace ServiceStackPlugins.PerFieldAuth
                 var propertyPermittedRoles = restrictAttrs.SelectMany(x => x.Roles);
                 var propertyPermittedPerms = restrictAttrs.SelectMany(x => x.Permissions);
                 var mode = restrictAttrs.Select(x => x.RolesPermsJoin).FirstOrDefault();
+                var inverted = restrictAttrs.Select(x => x.Inverse).FirstOrDefault();
                 if (restrictAttrs.Any() &&
-                    !UserSatisfiesRequirements(propertyPermittedRoles, propertyPermittedPerms, userAuthenticated,
-                        userRoles, userPerms, mode))
+                    (!UserSatisfiesRequirements(propertyPermittedRoles, propertyPermittedPerms, userAuthenticated,
+                       userRoles, userPerms, mode) ^ inverted))
                     propertiesToUnset.Add(property);
 
                 var permitAttrs = property.GetCustomAttributes<PermitFieldAttribute>(true);
                 propertyPermittedRoles = permitAttrs.SelectMany(x => x.Roles);
                 propertyPermittedPerms = permitAttrs.SelectMany(x => x.Permissions);
                 mode = permitAttrs.Select(x => x.RolesPermsJoin).FirstOrDefault();
+                inverted = permitAttrs.Select(x => x.Inverse).FirstOrDefault();
                 if (permitAttrs.Any() &&
-                    UserSatisfiesRequirements(propertyPermittedRoles, propertyPermittedPerms, userAuthenticated,
-                        userRoles, userPerms,mode))
+                    (UserSatisfiesRequirements(propertyPermittedRoles, propertyPermittedPerms, userAuthenticated,
+                        userRoles, userPerms,mode) ^ inverted))
                     propertiesToUnset.Remove(property);
             }
 

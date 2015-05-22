@@ -13,6 +13,10 @@ namespace ServiceStackPlugins.Interfaces.Auth
             Or
         };
 
+        /// <summary>
+        /// When set to true, the condition will be met when the user DOES NOT have role/permission
+        /// </summary>
+        public bool Inverse { get; set; }
         public string[] Roles { get; protected set; }
         public string[] Permissions { get; set; }
         public RolesPermsJoinMode RolesPermsJoin { get; set; }       

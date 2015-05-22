@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using ServiceStack;
 using ServiceStackPlugins.Interfaces.ListRequestResponse;
 
@@ -12,13 +13,36 @@ namespace ServiceStackPlugins.ListReqRespBuilder
         // http://stackoverflow.com/questions/16013807/unable-to-sort-with-property-name-in-linq-orderby
         public static IQueryable<T> OrderByField<T>(IQueryable<T> q, string sortField, bool @ascending)
         {
-            var param = Expression.Parameter(typeof (T), "p");
-            var prop = Expression.Property(param, sortField);
-            var exp = Expression.Lambda(prop, param);
-            var method = @ascending ? "OrderBy" : "OrderByDescending";
-            var types = new Type[] {q.ElementType, exp.Body.Type};
-            var mce = Expression.Call(typeof (Queryable), method, types, q.Expression, exp);
-            return q.Provider.CreateQuery<T>(mce);
+            //var param = Expression.Parameter(typeof (T), "p");
+            //var prop = Expression.Property(param, sortField);
+            //var exp = Expression.Lambda(prop, param);
+            //var method = @ascending ? "OrderBy" : "OrderByDescending";
+            //var types = new Type[] {q.ElementType, exp.Body.Type};
+            //var mce = Expression.Call(typeof (Queryable), method, types, q.Expression, exp);
+            //return q.Provider.CreateQuery<T>(mce);
+            var methodName = @ascending ? "OrderBy" : "OrderByDescending";
+            string[] props = sortField.Split('.');
+            Type type = typeof(T);
+            ParameterExpression arg = Expression.Parameter(type, "x");
+            Expression expr = arg;
+            foreach (string prop in props)
+            {
+                // use reflection (not ComponentModel) to mirror LINQ
+                PropertyInfo pi = type.GetProperty(prop);
+                expr = Expression.Property(expr, pi);
+                type = pi.PropertyType;
+            }
+            Type delegateType = typeof(Func<,>).MakeGenericType(typeof(T), type);
+            LambdaExpression lambda = Expression.Lambda(delegateType, expr, arg);
+
+            object result = typeof(Queryable).GetMethods().Single(
+                    method => method.Name == methodName
+                            && method.IsGenericMethodDefinition
+                            && method.GetGenericArguments().Length == 2
+                            && method.GetParameters().Length == 2)
+                    .MakeGenericMethod(typeof(T), type)
+                    .Invoke(null, new object[] { q, lambda });
+            return (IOrderedQueryable<T>)result;
         }
 
         /// <summary>
