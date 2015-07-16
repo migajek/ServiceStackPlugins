@@ -8,48 +8,28 @@ using ServiceStackPlugins.Interfaces.ListRequestResponse;
 using ServiceStackPlugins.ListReqRespBuilder;
 
 namespace ServiceStackPlugins.ListReqRespBuilderAutoMapper
-{
-    public interface IListRequestResponseMapperBuilder<TSource>
-        where TSource: class
-    {
-        ListResponse<TResponse> BuildProjectTo<TResponse>(ListRequestBase request);
-        ListResponse<TResponse> BuildUsingMap<TResponse>(ListRequestBase request);
-    }
+{    
 
-    class ListRequestResponseMapperBuilder<T> : IListRequestResponseMapperBuilder<T>
-        where T: class
+    public static class ListResponseMapperBuilderExtensons        
     {
-        private IQueryable<T> source;
-
-        public ListRequestResponseMapperBuilder(IQueryable<T> source)
+        static ListResponse<TResponse> EvaluateConditionally<TResponse>(ListResponse<TResponse> listResponse,
+            bool evaluate)
         {
-            this.source = source;
+            if (evaluate)
+                return listResponse.EvaluateNow();
+            return listResponse;
+        }
+        public static ListResponse<TResponse> BuildProjectTo<TSource,TResponse>(this IListResponseBuilder<TSource> source, ListRequestBase request, bool evaluateNow = true) 
+            where TSource : class
+        {
+            return EvaluateConditionally(source.Source.BuildListResponse(request, q => q.Project().To<TResponse>()), evaluateNow);
         }
 
-        public ListResponse<TResponse> BuildProjectTo<TResponse>(ListRequestBase request)
+        public static ListResponse<TResponse> BuildUsingMap<TSource, TResponse>(this IListResponseBuilder<TSource> source, ListRequestBase request, bool evaluateNow = true) 
+            where TSource : class
         {
-            return source.BuildListResponseProjectTo<T, TResponse>(request);
-        }
-
-        public ListResponse<TResponse> BuildUsingMap<TResponse>(ListRequestBase request)
-        {
-            return source.BuildListResponse(request, AutoMapper.Mapper.Map<IEnumerable<TResponse>>);
+            return EvaluateConditionally(source.Source.BuildListResponse(request, AutoMapper.Mapper.Map<IEnumerable<TResponse>>), evaluateNow);
         }
     }
 
-    public static class ListRequestResponseBuilderMapper
-    {
-
-        public static ListResponse<TResponse> BuildListResponseProjectTo<TDomain, TResponse>(this IQueryable<TDomain> query,
-            ListRequestBase request)
-        {
-            return query.BuildListResponse(request, q => q.Project().To<TResponse>());
-        }
-
-        public static IListRequestResponseMapperBuilder<TDomain> ListResponse<TDomain>(this IQueryable<TDomain> query)
-            where TDomain: class
-        {
-            return  new ListRequestResponseMapperBuilder<TDomain>(query);
-        }
-    }
 }

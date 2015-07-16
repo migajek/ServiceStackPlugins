@@ -12,7 +12,7 @@ namespace ServiceStackPlugins.UsersActivityStats
         public string UserId { get; set; }
         public string UserName { get; set; }
         public string LastSeenIp { get; set; }
-        public DateTime LastSeen { get; set; }
+        public DateTimeOffset LastSeen { get; set; }
     }
 
     public class UserActivityInfo: UserInfo
@@ -35,7 +35,7 @@ namespace ServiceStackPlugins.UsersActivityStats
 
         public void LoadFromCache(ICacheClient cacheClient)
         {
-            _userInfos = cacheClient.Get<Dictionary<string, UserInfo>>(CacheKey);
+            _userInfos = cacheClient.Get<Dictionary<string, UserInfo>>(CacheKey) ?? new Dictionary<string, UserInfo>();
         }
 
         public UserStatsCollector()
@@ -60,13 +60,13 @@ namespace ServiceStackPlugins.UsersActivityStats
                 UserId = uid,
                 UserName = uname,
                 LastSeenIp = ip,
-                LastSeen = DateTime.UtcNow
+                LastSeen = DateTimeOffset.UtcNow
             };
         }
 
         public IEnumerable<UserActivityInfo> GetUsers(TimeSpan inactivityTreshold)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
             return from u in _userInfos.Values.OrderByDescending(x => x.LastSeen)
                 let inactiveFor = now - u.LastSeen
                 select new UserActivityInfo()
@@ -80,9 +80,11 @@ namespace ServiceStackPlugins.UsersActivityStats
                 };
         }
 
-        public void Cleanup(TimeSpan inactivityTreshold)
+        public void Cleanup(TimeSpan inactivityTreshold, int whenMoreThan = 200)
         {
-            var now = DateTime.UtcNow;
+            if (_userInfos.Count < whenMoreThan)
+                return;
+            var now = DateTimeOffset.UtcNow;
             _userInfos = _userInfos.Where(kv => now - kv.Value.LastSeen > inactivityTreshold).ToDictionary(kv => kv.Key, kv => kv.Value);
         }
 

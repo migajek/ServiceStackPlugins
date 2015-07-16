@@ -26,31 +26,38 @@ namespace ServiceStackPlugins.UsersActivityStats
         /// </summary>
         public TimeSpan InactivityTimespan { get; set; }
 
+        public bool RegisterRequestFilter { get; set; }
+        public bool RegisterResponseFilter { get; set; }
+
+
         public void Register(IAppHost appHost)
-        {
-            appHost.GlobalRequestFilters.Add(RequestFilter);
+        {            
             appHost.GetContainer().RegisterAutoWiredAs<UserActivityStats, IUserActivityStats>();
+            if (RegisterRequestFilter)
+            appHost.GlobalRequestFilters.Add(Filter);
+            if (RegisterResponseFilter)
+                appHost.GlobalResponseFilters.Add(Filter);
         }
 
         public UsersActivityFeature()
         {
             UserNameExtractor = x => x.UserName;
             InactivityTimespan = new TimeSpan(0,0,3,0);
+            RegisterRequestFilter = true;
         }
-        
-        private void RequestFilter(IRequest request, IResponse response, object arg3)
+
+        private void Filter(IRequest request, IResponse response, object arg3)
         {
             var authSession = request.GetSession();
             var cache = request.TryResolve<ICacheClient>();
-            if (cache == null)
+            if (cache == null || authSession == null || !authSession.IsAuthenticated)
                 return;
 
-            if (authSession != null)
-                using (var collector = new UserStatsCollector(cache))
-                {
-                    collector.UserSeen(authSession.UserAuthId, UserNameExtractor(authSession), request.RemoteIp);
-                    collector.Cleanup(InactivityTimespan);
-                }
-        }        
+            using (var collector = new UserStatsCollector(cache))
+            {
+                collector.UserSeen(authSession.UserAuthId, UserNameExtractor(authSession), request.RemoteIp);
+                collector.Cleanup(InactivityTimespan);
+            }
+        }
     }
 }

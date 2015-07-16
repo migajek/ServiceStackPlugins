@@ -112,7 +112,15 @@ namespace ServiceStackPlugins.ListReqRespBuilder
             return source;
         }
 
-
+        /// <summary>
+        /// Builds list response using provided converter
+        /// </summary>
+        /// <typeparam name="TDomain"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="request"></param>
+        /// <param name="converter"></param>
+        /// <returns></returns>
         public static ListResponse<TResponse> BuildListResponse<TDomain, TResponse>(this IQueryable<TDomain> query,
             ListRequestBase request, Func<IQueryable<TDomain>, IEnumerable<TResponse>> converter)
         {
@@ -132,5 +140,46 @@ namespace ServiceStackPlugins.ListReqRespBuilder
             return BuildListResponse<TDomain, TResponse>(query, request, q => q.Select<TDomain, TResponse>(x => x.ConvertTo<TResponse>()));
         }
 
+        public static IListResponseBuilder<TDomain> ListResponse<TDomain>(this IQueryable<TDomain> query)
+            where TDomain : class
+        {
+            return new ListResponseBuilder<TDomain>(query);
+        }
+
+
+    }
+
+    public interface IListResponseBuilder<TSource>
+        where TSource : class
+    {
+        IQueryable<TSource> Source { get; }
+        ListResponse<TResponse> BuildWithConvert<TResponse>(ListRequestBase request);
+    }
+
+    class ListResponseBuilder<T> : IListResponseBuilder<T>
+       where T : class
+    {
+        private IQueryable<T> source;
+
+        public ListResponseBuilder(IQueryable<T> source)
+        {
+            this.source = source;
+        }
+
+        public IQueryable<T> Source { get { return source; }}
+
+        public ListResponse<TResponse> BuildWithConvert<TResponse>(ListRequestBase request)
+        {
+            return source.BuildListResponseConvertTo<T, TResponse>(request);
+        }
+    }
+
+    public static class ListResponseExtensions
+    {
+        public static ListResponse<TResponse> EvaluateNow<TResponse>(this ListResponse<TResponse> response)
+        {
+            response.Items = response.Items.ToArray();
+            return response;
+        }
     }
 }
